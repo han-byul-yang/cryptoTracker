@@ -1,10 +1,85 @@
 import styled from "styled-components"
+import axios from "axios"
+import { useEffect, useState } from "react"
+import { Link } from "react-router-dom"
 
 const Title = styled.div`
+font-size: 48px;
 color: ${(props)=>props.theme.accentColor};`
 
-function Coins () {
-    return <Title>Coin</Title>
+const Container = styled.div`
+padding: 0px 20px;`
+
+const Header = styled.header`
+height: 15vh;
+display: flex;
+justify-content: center;
+align-items: center;`
+
+const CoinsList = styled.ul``
+
+const Coin = styled.li`
+background-color: white;
+  color: ${(props) => props.theme.backgroundColor};
+  border-radius: 15px;
+  padding: 0.5vh;
+  margin-bottom: 10px;
+  a {
+    display: flex;
+    text-align: center;
+    align-items: center;
+    padding: 20px;
+    transition: color 0.2s ease-in;
+  }
+  &:hover {
+    a {
+      color: ${(props) => props.theme.accentColor};
+    }
+  }`
+
+const Loader = styled.div`
+`
+
+const Img = styled.img`
+width: 35px;
+  height: 35px;
+  margin-right: 10px;`
+
+//typescript axios api 데이터 interface 타입 제한
+interface List {
+    id: string,
+    name: string,
+    symbol: string,
+    rank: number,
+    is_new: boolean,
+    is_active: boolean,
+    type: string,
+}
+
+
+const Coins = () => {
+    const [coinMap, setCoinMap] = useState<List[]>([]) //useState 타입 제한
+    const [loading, setLoading] = useState(true) //loading state 설정
+
+useEffect (() => {
+    axios.get<List[]>('https://api.coinpaprika.com/v1/coins' //axios 타입 제한
+    ).then(function(response){
+        setCoinMap(response.data.slice(0,100))
+        setLoading(false)
+    }).catch(function(error){console.log(error)})
+
+},[])
+
+    return <Container>
+    <Header>
+      <Title>코인</Title>
+    </Header>
+    {loading ? <Loader>loading...</Loader> :
+    <CoinsList>
+        {coinMap.map((ele) => (<Coin key={ele.id}><Link to={{pathname:`/${ele.id}`, state: {name: ele.name}}}> {/*Link to를 통해서 state를 담아 다른 페이지로 넘겨줌*/}
+            <Img src={`https://cryptoicon-api.vercel.app/api/icon/${ele.symbol.toLowerCase()}`}></Img>{ele.name} &rarr;</Link></Coin>))}
+    </CoinsList> }
+    </Container>
 }
 
 export default Coins
