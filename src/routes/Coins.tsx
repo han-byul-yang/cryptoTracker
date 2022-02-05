@@ -2,6 +2,11 @@ import styled from "styled-components"
 import axios from "axios"
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
+import { useQuery } from "react-query"
+import {fetchCoins} from "../Api"
+import { Helmet } from "react-helmet"
+import { useSetRecoilState } from "recoil"
+import { isDarkAtom } from "../atom"
 
 const Title = styled.div`
 font-size: 48px;
@@ -20,7 +25,7 @@ const CoinsList = styled.ul``
 
 const Coin = styled.li`
 background-color: white;
-  color: ${(props) => props.theme.backgroundColor};
+  color: ${(props) => props.theme.textColor};
   border-radius: 15px;
   padding: 0.5vh;
   margin-bottom: 10px;
@@ -58,25 +63,30 @@ interface List {
 
 
 const Coins = () => {
-    const [coinMap, setCoinMap] = useState<List[]>([]) //useState 타입 제한
-    const [loading, setLoading] = useState(true) //loading state 설정
+    // const [coinMap, setCoinMap] = useState<List[]>([]) //useState 타입 제한
+    // const [loading, setLoading] = useState(true) //loading state 설정
+    const {isLoading, data} = useQuery<List[]>('allCoins', fetchCoins)
+    const darkAtomfn = useSetRecoilState(isDarkAtom) //useSetRecoilState는 atom의 value를 수정해주는 역할
+// useEffect (() => {
+//     axios.get<List[]>('https://api.coinpaprika.com/v1/coins' //axios 타입 제한
+//     ).then(function(response){
+//         setCoinMap(response.data.slice(0,100))
+//         setLoading(false)
+//     }).catch(function(error){console.log(error)})
 
-useEffect (() => {
-    axios.get<List[]>('https://api.coinpaprika.com/v1/coins' //axios 타입 제한
-    ).then(function(response){
-        setCoinMap(response.data.slice(0,100))
-        setLoading(false)
-    }).catch(function(error){console.log(error)})
-
-},[])
+// },[])
 
     return <Container>
+      <Helmet>
+        <title>코인</title>
+      </Helmet>
     <Header>
       <Title>코인</Title>
+      <button onClick={() => darkAtomfn((ele) =>!ele)}>theme</button>
     </Header>
-    {loading ? <Loader>loading...</Loader> :
+    {isLoading ? <Loader>loading...</Loader> :
     <CoinsList>
-        {coinMap.map((ele) => (<Coin key={ele.id}><Link to={{pathname:`/${ele.id}`, state: {name: ele.name}}}> {/*Link to를 통해서 state를 담아 다른 페이지로 넘겨줌*/}
+        {data?.slice(0,100).map((ele) => (<Coin key={ele.id}><Link to={{pathname:`/${ele.id}`, state: {name: ele.name}}}> {/*Link to를 통해서 state를 담아 다른 페이지로 넘겨줌*/}
             <Img src={`https://cryptoicon-api.vercel.app/api/icon/${ele.symbol.toLowerCase()}`}></Img>{ele.name} &rarr;</Link></Coin>))}
     </CoinsList> }
     </Container>
