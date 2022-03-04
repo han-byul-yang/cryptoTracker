@@ -1,10 +1,16 @@
-import { Route, Switch, useLocation, useParams, Link, useRouteMatch } from "react-router-dom"
+import { Route, Switch, useLocation, useParams, Link, useRouteMatch, withRouter } from "react-router-dom"
+import { useState } from "react";
 import styled from "styled-components";
 import Chart from "./Chart";
 import Price from "./Price";
 import { useQuery } from "react-query";
 import { fetchCoinInfo, fetchCoinTickers } from "../Api";
 import {Helmet} from 'react-helmet'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";//기본 
+import { faCircleArrowLeft, faMoon, faSun } from "@fortawesome/free-solid-svg-icons"
+import { RouteComponentProps } from 'react-router-dom';
+import { useSetRecoilState } from "recoil"
+import { isDarkAtom } from "../atom"
 
 const Title = styled.h1`
   font-size: 48px;
@@ -72,6 +78,18 @@ const Tab = styled.span<{isActive : boolean}>`
     display: block;
   }
 `;
+const ArrowIcon = styled.div`
+position: absolute;
+left: 35px;
+top: 35px;
+transform: scale(1.6);`
+
+const ThemeBtn = styled.div`
+position : absolute;
+top: 30px;
+right: 60px;
+transform: scale(1.8);
+`
 
 interface RouteParams {
     coinId: string,
@@ -79,6 +97,9 @@ interface RouteParams {
 
 interface StateName {
     name: string,
+}
+interface History{
+  history: RouteComponentProps["history"];
 }
 
 interface InfoData {
@@ -136,7 +157,7 @@ interface InfoData {
     };
   }
 
- function Coin () {
+ function Coin({history}: History){
     //  const [loading, setLoading] = useState(true)
     //  const [infoData, setCoinInfo] = useState<InfoData>() 
     //  const [tickerData, setCoinPrice] = useState<PriceData>()
@@ -144,31 +165,14 @@ interface InfoData {
     const {state} = useLocation<StateName>() //Coins 컴포넌트로 부터 state 받음
     const priceMatch = useRouteMatch('/:coinId/price')
     const chartMatch = useRouteMatch('/:coinId/chart')
+    const darkAtomfn = useSetRecoilState(isDarkAtom)
+    const [toggle, setToggle] = useState<Boolean>(true)
     const {isLoading: infoLoading, data: infoData} = useQuery(['info',coinId], ()=>fetchCoinInfo(coinId)) //고유한 값을 가져야하기 때문에 배열로 만들어 coinId 앞에 'info' 추가(고유한 값을 가져야하는 이유는 api를 불러올 때 이 값을 보고 같은 값이면 불러올 필요가 없다고 판단하게 되기 때문에 )
     const {isLoading: tickerLoading, data: tickerData} = useQuery(['tickers', coinId], ()=>fetchCoinTickers(coinId), {refetchInterval: 5000}) //왜 화살표 함수로 해주어야 하는지 의문 //isLoading과 data는 객체의 property를 가져와서 syntax로 바꿔줌(자바스크립트) 
-    // useEffect (() => {
-    //     /*async () => await axios.get<List[]>('https://api.coinpaprika.com/v1/coins' //axios 타입 제한
-    //     ).then(function(response){
-    //         setCoinInfo(response.data.slice(0,100))
-    //         console.log(response.data)
-    //     }).catch(function(error){console.log(error)})
-    //     async() => await axios.get('https://api.coinpaprika.com/v1/tickers' //axios 타입 제한
-    //     ).then(function(response){
-    //         console.log(response.data)
-    //         setLoading(false)
-    //     }).catch(function(error){console.log(error)})*/ //axios로 하려니까 오류'Expected an assignment or function call and instead saw an expression' 발생
-    //     (async () => {
-    //         const infoData = await (
-    //           await fetch(`https://api.coinpaprika.com/v1/coins/${coinId}`)
-    //         ).json();
-    //         const priceData = await (
-    //           await fetch(`https://api.coinpaprika.com/v1/tickers/${coinId}`)
-    //         ).json();
-    //         setCoinInfo(infoData);
-    //         setCoinPrice(priceData);
-    //         setLoading(false)
-    //       })();
-    // },[])
+
+    const moveToBack = () => {
+        history.push('/')
+    }
 
     const isLoading = infoLoading || tickerLoading
      return(
@@ -179,6 +183,8 @@ interface InfoData {
         </title>
        </Helmet>
       <Header>
+      <ArrowIcon onClick={moveToBack}><FontAwesomeIcon icon={faCircleArrowLeft} className="search" /></ArrowIcon>
+      <ThemeBtn onClick={() => {darkAtomfn((ele) =>!ele); setToggle((stat) => !stat)}}>{toggle ? <FontAwesomeIcon icon={faMoon} /> : <FontAwesomeIcon icon={faSun}></FontAwesomeIcon>}</ThemeBtn>
       <Title>
           {state?.name ? state.name : isLoading ? "Loading..." : infoData?.name}
         </Title> {/*바로 'https://api.coinpaprika.com/v1/coins/:coindId'로 넘어간 경우 정보가 state로 들어오지 않으므로 처리*/}
@@ -217,7 +223,7 @@ interface InfoData {
               <Link to={`/${coinId}/chart`}>Chart</Link>
             </Tab>
             <Tab isActive={priceMatch !== null}>
-              <Link to={`/${coinId}/price`}>Price</Link>
+              <Link to={{pathname:`/${coinId}/price`, state: {price: tickerData.quotes.USD.price}}}>Price</Link>
             </Tab>
           </Tabs>
           <Switch> {/*한번에 한번씩만 컴포넌트 보여주기*/}
@@ -229,4 +235,4 @@ interface InfoData {
     </Container>)
  }
 
- export default Coin
+ export default withRouter(Coin)

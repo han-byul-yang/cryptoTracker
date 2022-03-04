@@ -7,6 +7,8 @@ import {fetchCoins} from "../Api"
 import { Helmet } from "react-helmet"
 import { useSetRecoilState } from "recoil"
 import { isDarkAtom } from "../atom"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";//기본 
+import { faMoon, faSun } from "@fortawesome/free-solid-svg-icons"
 
 const Title = styled.div`
 font-size: 48px;
@@ -50,6 +52,12 @@ width: 35px;
   height: 35px;
   margin-right: 10px;`
 
+const ThemeBtn = styled.div`
+position : absolute;
+top: 30px;
+right: 60px;
+transform: scale(1.8);`
+
 //typescript axios api 데이터 interface 타입 제한
 interface List {
     id: string,
@@ -67,6 +75,7 @@ const Coins = () => {
     // const [loading, setLoading] = useState(true) //loading state 설정
     const {isLoading, data} = useQuery<List[]>('allCoins', fetchCoins)
     const darkAtomfn = useSetRecoilState(isDarkAtom) //useSetRecoilState는 atom의 value를 수정해주는 역할
+    const [toggle, setToggle] = useState(true)
 // useEffect (() => {
 //     axios.get<List[]>('https://api.coinpaprika.com/v1/coins' //axios 타입 제한
 //     ).then(function(response){
@@ -82,7 +91,7 @@ const Coins = () => {
       </Helmet>
     <Header>
       <Title>코인</Title>
-      <button onClick={() => darkAtomfn((ele) =>!ele)}>theme</button>
+      <ThemeBtn onClick={() => {darkAtomfn((ele) =>!ele); setToggle((stat) => !stat)}}>{toggle ? <FontAwesomeIcon icon={faMoon} /> : <FontAwesomeIcon icon={faSun}></FontAwesomeIcon>}</ThemeBtn>
     </Header>
     {isLoading ? <Loader>loading...</Loader> :
     <CoinsList>
