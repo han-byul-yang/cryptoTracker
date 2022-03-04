@@ -3,6 +3,7 @@ import { fetchCoinOhlcv } from "../Api"
 import ApexChart from "react-apexcharts";
 import { useRecoilValue } from "recoil";
 import { isDarkAtom } from "../atom";
+import React from 'react'
 
 interface ChartProps {
     coinId : string,
