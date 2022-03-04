@@ -76,14 +76,7 @@ const Coins = () => {
     const {isLoading, data} = useQuery<List[]>('allCoins', fetchCoins)
     const darkAtomfn = useSetRecoilState(isDarkAtom) //useSetRecoilState는 atom의 value를 수정해주는 역할
     const [toggle, setToggle] = useState(true)
-// useEffect (() => {
-//     axios.get<List[]>('https://api.coinpaprika.com/v1/coins' //axios 타입 제한
-//     ).then(function(response){
-//         setCoinMap(response.data.slice(0,100))
-//         setLoading(false)
-//     }).catch(function(error){console.log(error)})
 
-// },[])
 
     return <Container>
       <Helmet>

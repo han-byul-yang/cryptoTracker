@@ -5,7 +5,7 @@ import Chart from "./Chart";
 import Price from "./Price";
 import { useQuery } from "react-query";
 import { fetchCoinInfo, fetchCoinTickers } from "../Api";
-import {Helmet} from 'react-helmet'
+import { Helmet, HelmetProvider } from "react-helmet-async";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";//기본 
 import { faCircleArrowLeft, faMoon, faSun } from "@fortawesome/free-solid-svg-icons"
 import { RouteComponentProps } from 'react-router-dom';
@@ -177,11 +177,13 @@ interface InfoData {
     const isLoading = infoLoading || tickerLoading
      return(
      <Container>
-       <Helmet>
+       <HelmetProvider>
+         <Helmet>
        <title>
           {state?.name ? state.name : isLoading ? "Loading..." : infoData?.name}
         </title>
-       </Helmet>
+        </Helmet>
+       </HelmetProvider>
       <Header>
       <ArrowIcon onClick={moveToBack}><FontAwesomeIcon icon={faCircleArrowLeft} className="search" /></ArrowIcon>
       <ThemeBtn onClick={() => {darkAtomfn((ele) =>!ele); setToggle((stat) => !stat)}}>{toggle ? <FontAwesomeIcon icon={faMoon} /> : <FontAwesomeIcon icon={faSun}></FontAwesomeIcon>}</ThemeBtn>

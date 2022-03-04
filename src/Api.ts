@@ -1,20 +1,20 @@
 const BASE_URL = 'https://api.coinpaprika.com/v1'
 
-export const fetchCoins = () => {
-    return fetch(`${BASE_URL}/coins`).then((response)=> response.json())
+export const fetchCoins = async() => {
+    return await fetch(`${BASE_URL}/coins`).then((response)=> response.json())
 }
 
-export const fetchCoinInfo = (coinId : string) => {
-    return fetch(`${BASE_URL}/coins/${coinId}`).then((response)=> response.json())
+export const fetchCoinInfo = async(coinId : string) => {
+    return await fetch(`${BASE_URL}/coins/${coinId}`).then((response)=> response.json())
 }
 
-export const fetchCoinTickers = (coinId : string) => {
-    return fetch(`${BASE_URL}/tickers/${coinId}`).then((response)=> response.json())
+export const fetchCoinTickers = async(coinId : string) => {
+    return await fetch(`${BASE_URL}/tickers/${coinId}`).then((response)=> response.json())
 }
 
-export const fetchCoinOhlcv = (coinId : string) => {
+export const fetchCoinOhlcv = async(coinId : string) => {
     const date = Date.now()
     const end = Math.floor(date / 1000)
     const start = Math.floor(end - 60 * 60 * 24 * 7 * 2)
-    return fetch(`${BASE_URL}/coins/${coinId}/ohlcv/historical?start=${start}&end=${end}`).then((response)=> response.json())
+    return await fetch(`${BASE_URL}/coins/${coinId}/ohlcv/historical?start=${start}&end=${end}`).then((response)=> response.json())
 }
